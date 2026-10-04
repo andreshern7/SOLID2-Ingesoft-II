@@ -160,3 +160,20 @@ que implemente `ReglaComision`.
 constructor en vez de crearla. Si el mapa de tipos viviera dentro de la calculadora,
 cada tipo nuevo obligaría a editarla. Las demás dependencias del servicio se inyectarán
 en el punto de control D.
+
+### Punto de control L
+
+Nuestra solución detecta el error al compilar. `CDT` ya no hereda de `Cuenta`: las dos clases
+heredan de `CuentaBase`, que no tiene el método `retirar`. Como `CobroCuotaManejo.cobrarMensual`
+recibe una `List<Cuenta>`, intentar incluir un CDT produce el error `incompatible types` y el
+programa no se construye.
+
+Es mejor detectarlo al compilar porque el error lo ve el desarrollador en su computador, antes de
+que el código llegue a producción. Al ejecutar, el error aparece con datos reales: en el
+experimento 1 el proceso le cobró a Ana, se cayó en el CDT y nunca le cobró a Luis.
+
+Envolver el retiro en un `try/catch` no resuelve el diseño porque el CDT seguiría prometiendo algo
+que no cumple: `Cuenta` dice "se puede retirar" y el CDT no puede. Cada lugar que use una `Cuenta`
+tendría que acordarse de poner su propio `try/catch`, y el que lo olvide vuelve a fallar. Además,
+ignorar la excepción esconde también errores legítimos, como un saldo insuficiente, y el banco
+dejaría de cobrar sin que nadie se entere.
