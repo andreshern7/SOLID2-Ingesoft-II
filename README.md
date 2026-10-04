@@ -177,3 +177,18 @@ que no cumple: `Cuenta` dice "se puede retirar" y el CDT no puede. Cada lugar qu
 tendría que acordarse de poner su propio `try/catch`, y el que lo olvide vuelve a fallar. Además,
 ignorar la excepción esconde también errores legítimos, como un saldo insuficiente, y el banco
 dejaría de cobrar sin que nadie se entere.
+
+### Punto de control I
+
+Sí. `GeneradorExtractos` recibe una lista de `ProductoBancario` e imprime el extracto de cada
+elemento, y funciona igual con cuentas de ahorros, CDT, tarjetas de crédito y créditos de vivienda.
+Lo probamos con una lista que mezclaba los cuatro y los imprimió todos.
+
+La única interfaz que necesitó es `ProductoBancario`, que quedó con un solo método:
+`generarExtracto()`. Los métodos de intereses y de pago de cuota pasaron a otra interfaz,
+`ProductoCredito`, que solo implementan la tarjeta y el crédito de vivienda.
+
+El generador no necesita conocer los demás métodos porque lo único que hace es pedir el extracto.
+No le importa si el producto permite retirar, depositar o pagar cuotas, así que no depende de
+ellos. Por eso ya no hay métodos vacíos: `TarjetaCredito` perdió su `depositar` y `CreditoVivienda`
+perdió su `depositar` y su `retirar`, que antes existían solo porque la interfaz los exigía.

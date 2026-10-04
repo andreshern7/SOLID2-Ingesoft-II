@@ -1,4 +1,4 @@
-public abstract class CuentaBase {
+public abstract class CuentaBase implements ProductoBancario {
     protected final String numero;
     protected final String titular;
     protected double saldo;
@@ -17,6 +17,8 @@ public abstract class CuentaBase {
         if (monto <= 0) throw new IllegalArgumentException("Monto inválido");
         saldo += monto;
     }
+
+    public String generarExtracto() { return "Cuenta " + numero + " - saldo: $" + saldo; }
 
     protected void debitar(double monto) {
         if (monto > saldo) throw new IllegalStateException("Saldo insuficiente");
