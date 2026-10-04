@@ -1,10 +1,15 @@
+import java.util.Map;
+
 public class CalculadoraComision {
+    private final Map<String, ReglaComision> reglas;
+
+    public CalculadoraComision(Map<String, ReglaComision> reglas) {
+        this.reglas = reglas;
+    }
+
     public double calcular(double monto, String tipo) {
-        return switch (tipo) {
-            case "MISMO_BANCO" -> 0;
-            case "OTRO_BANCO" -> 7_500;
-            case "INTERNACIONAL" -> monto * 0.03 + 25_000;
-            default -> throw new IllegalArgumentException("Tipo de transferencia desconocido");
-        };
+        ReglaComision regla = reglas.get(tipo);
+        if (regla == null) throw new IllegalArgumentException("Tipo de transferencia desconocido");
+        return regla.calcular(monto);
     }
 }
