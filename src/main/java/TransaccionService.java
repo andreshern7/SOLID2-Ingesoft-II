@@ -4,11 +4,11 @@ public class TransaccionService {
     private final RepositorioTransacciones repositorio;
     private final GeneradorComprobante comprobante;
     private final NotificadorTransferencia notificador;
-    private final RegistroAuditoria auditoria;
+    private final RegistroTransaccion auditoria;
 
     public TransaccionService(ValidadorMonto validador, CalculadoraComision calculadora,
                               RepositorioTransacciones repositorio, GeneradorComprobante comprobante,
-                              NotificadorTransferencia notificador, RegistroAuditoria auditoria) {
+                              NotificadorTransferencia notificador, RegistroTransaccion auditoria) {
         this.validador = validador;
         this.calculadora = calculadora;
         this.repositorio = repositorio;

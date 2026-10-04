@@ -17,9 +17,12 @@ public class Main {
         RepositorioTransacciones repositorio = new OracleRepositorio();
         CanalNotificacion canal = new CanalMultiple(List.of(new SmsGateway(), new PushGateway()));
 
+        RegistroTransaccion registro =
+            new RegistroMultiple(List.of(new RegistroAuditoria(), new SistemaAntifraude()));
+
         TransaccionService servicio = new TransaccionService(
             new ValidadorMonto(), calculadora, repositorio, new GeneradorComprobante(),
-            new NotificadorTransferencia(canal), new RegistroAuditoria());
+            new NotificadorTransferencia(canal), registro);
         servicio.transferir(ana, luis, 150_000, "OTRO_BANCO");
 
         new CobroCuotaManejo().cobrarMensual(List.of(ana, luis));

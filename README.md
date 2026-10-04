@@ -253,6 +253,7 @@ commit `bloque-0-codigo-base`. Las columnas de archivos cuentan solo código (no
 | R1 | 1 (`TransaccionService`) | 1 (`Main`) | 2 (`ComisionLlave` y su prueba `TransferenciaLlaveTest`) | No |
 | R2 | 4 (`Main`, `Cuenta`, `CobroCuotaManejo`, `TransaccionService`) | 0 | 2 (`CuentaInfantil` y su prueba `CuentaInfantilTest`) | No |
 | R3 | 2 (`TransaccionService`, `SmsGateway`) | 1 (`Main`) | 3 (`PushGateway`, `CanalMultiple` y su prueba `CanalMultipleTest`) | No |
+| R4 | 2 (`TransaccionService`, `OracleRepositorio`) | 3 (`TransaccionService`, `RegistroAuditoria`, `Main`) | 5 (`RegistroTransaccion`, `SistemaAntifraude`, `RegistroMultiple`, el doble `RegistroFalso` y la prueba `RegistroTransaccionTest`) | No |
 
 **R1: Transferencias por llave.** Se creó la regla `ComisionLlave`, que devuelve comisión 0, y se
 registró el tipo `LLAVE` en el mapa de `Main`. En el código original habría que haber editado el
@@ -273,3 +274,13 @@ línea para armar el canal con SMS y push. `NotificadorTransferencia` no se toc�
 sigue siendo un solo canal. Al ejecutar el programa, por la transferencia aparecen las líneas
 `[SMS]` y una línea `[PUSH]`. Desde aquí la salida del programa ya no es igual a
 `salida_original.txt`, porque se agregó funcionalidad.
+
+**R4: Sistema antifraude.** Este fue el requerimiento que el diseño no aguantó sin cambios. En el
+punto de control D no le pusimos interfaz a la auditoría porque solo existía una versión, así que
+`TransaccionService` recibía directamente un `RegistroAuditoria`. Para agregar el antifraude hubo
+que crear la interfaz `RegistroTransaccion`, hacer que `RegistroAuditoria` la implemente y cambiar
+el tipo del atributo y del parámetro en `TransaccionService`. Fueron 3 líneas en total entre las
+dos clases, y el método `transferir` no se tocó. Después se creó `SistemaAntifraude` y
+`RegistroMultiple`, que reparte el registro a los dos. Las cinco pruebas del bloque 3 siguieron
+pasando sin modificarlas. Al ejecutar el programa aparecen la línea `[AUDITORIA]` y la línea
+`[ANTIFRAUDE]`, y la prueba nueva comprueba que una transferencia rechazada no genera ninguna.
