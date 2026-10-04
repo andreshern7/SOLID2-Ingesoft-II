@@ -144,3 +144,19 @@ Solo `GeneradorComprobante.java`. El método que mueve el dinero no se abre.
 
 **Nota:** el servicio todavía crea sus dependencias con `new`. Eso se corrige en el
 punto de control D; en este punto solo se separaron responsabilidades.
+
+### Punto de control O
+
+El `switch` de comisiones se reemplazó por la interfaz `ReglaComision`, con una clase por
+tipo de transferencia: `ComisionMismoBanco`, `ComisionOtroBanco` y `ComisionInternacional`.
+`CalculadoraComision` recibe un mapa tipo → regla en su constructor y ya no conoce ningún
+tipo concreto. El catálogo de tipos se arma en `Main`.
+
+**Si mañana llega un tipo de transferencia nuevo, ¿qué archivos existentes hay que modificar?**
+Solo `Main.java`, para registrar el tipo en el mapa. Lo demás es código nuevo: una clase
+que implemente `ReglaComision`.
+
+**Decisión:** para lograrlo, `TransaccionService` recibe la `CalculadoraComision` por su
+constructor en vez de crearla. Si el mapa de tipos viviera dentro de la calculadora,
+cada tipo nuevo obligaría a editarla. Las demás dependencias del servicio se inyectarán
+en el punto de control D.
