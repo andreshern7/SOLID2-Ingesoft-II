@@ -242,3 +242,17 @@ escribir cumpliendo la condición. El servicio creaba su propio `OracleRepositor
 `SmsGateway`, así que cada prueba habría escrito en la base de datos de producción y le habría
 enviado un SMS a un cliente, como pasó en el experimento 2. Tampoco se habría podido comprobar
 que una transferencia rechazada no guarda nada, porque no había forma de mirar qué se guardó.
+
+## Bloque 4 — Negocio pidió cambios
+
+La estimación se hizo antes de programar cada requerimiento, mirando el código original del
+commit `bloque-0-codigo-base`. Las columnas de archivos cuentan solo código (no el README).
+
+| Req. | Archivos a modificar en el código original (estimado) | Archivos existentes modificados (real) | Archivos nuevos | ¿Se rompió alguna prueba? |
+|---|---|---|---|---|
+| R1 | 1 (`TransaccionService`) | 1 (`Main`) | 2 (`ComisionLlave` y su prueba `TransferenciaLlaveTest`) | No |
+
+**R1: Transferencias por llave.** Se creó la regla `ComisionLlave`, que devuelve comisión 0, y se
+registró el tipo `LLAVE` en el mapa de `Main`. En el código original habría que haber editado el
+`switch` de `TransaccionService`. La prueba nueva comprueba el criterio de aceptación: una
+transferencia de $50.000 por llave descuenta exactamente $50.000 del origen.
