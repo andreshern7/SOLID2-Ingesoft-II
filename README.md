@@ -251,8 +251,17 @@ commit `bloque-0-codigo-base`. Las columnas de archivos cuentan solo código (no
 | Req. | Archivos a modificar en el código original (estimado) | Archivos existentes modificados (real) | Archivos nuevos | ¿Se rompió alguna prueba? |
 |---|---|---|---|---|
 | R1 | 1 (`TransaccionService`) | 1 (`Main`) | 2 (`ComisionLlave` y su prueba `TransferenciaLlaveTest`) | No |
+| R2 | 4 (`Main`, `Cuenta`, `CobroCuotaManejo`, `TransaccionService`) | 0 | 2 (`CuentaInfantil` y su prueba `CuentaInfantilTest`) | No |
 
 **R1: Transferencias por llave.** Se creó la regla `ComisionLlave`, que devuelve comisión 0, y se
 registró el tipo `LLAVE` en el mapa de `Main`. En el código original habría que haber editado el
 `switch` de `TransaccionService`. La prueba nueva comprueba el criterio de aceptación: una
 transferencia de $50.000 por llave descuenta exactamente $50.000 del origen.
+
+**R2: Cuenta infantil.** Se creó `CuentaInfantil`, que hereda de `Cuenta` y lleva el acumulado de
+retiros del día. Como es una `Cuenta`, funciona como origen de transferencias y en el cobro de
+cuota de manejo sin tocar `TransaccionService` ni `CobroCuotaManejo`. La estimación fue más alta
+que lo real: en el código original tampoco hacía falta editar esas clases, porque ya recibían
+cualquier `Cuenta`. Queda una limitación: la cuota de manejo se cobra con `retirar`, así que
+cuenta para el tope diario. Si la cuenta ya retiró más de $187.100 ese día, el cobro de la cuota
+se rechazaría.
