@@ -14,7 +14,7 @@ public class Main {
             "INTERNACIONAL", new ComisionInternacional(),
             "LLAVE", new ComisionLlave()));
 
-        RepositorioTransacciones repositorio = new OracleRepositorio();
+        RepositorioTransacciones repositorio = new PostgresRepositorio();
         CanalNotificacion canal = new CanalMultiple(List.of(new SmsGateway(), new PushGateway()));
 
         RegistroTransaccion registro =

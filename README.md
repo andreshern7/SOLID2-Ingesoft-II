@@ -254,6 +254,11 @@ commit `bloque-0-codigo-base`. Las columnas de archivos cuentan solo código (no
 | R2 | 4 (`Main`, `Cuenta`, `CobroCuotaManejo`, `TransaccionService`) | 0 | 2 (`CuentaInfantil` y su prueba `CuentaInfantilTest`) | No |
 | R3 | 2 (`TransaccionService`, `SmsGateway`) | 1 (`Main`) | 3 (`PushGateway`, `CanalMultiple` y su prueba `CanalMultipleTest`) | No |
 | R4 | 2 (`TransaccionService`, `OracleRepositorio`) | 3 (`TransaccionService`, `RegistroAuditoria`, `Main`) | 5 (`RegistroTransaccion`, `SistemaAntifraude`, `RegistroMultiple`, el doble `RegistroFalso` y la prueba `RegistroTransaccionTest`) | No |
+| R5 | 3 (`TransaccionService`, `Main`, `OracleRepositorio`) | 1 (`Main`) | 1 (`PostgresRepositorio`) | No |
+
+En total, sumando los cinco requerimientos, se modificaron 6 veces archivos existentes. Son 3
+archivos distintos: `Main` (en R1, R3, R4 y R5), `TransaccionService` y `RegistroAuditoria` (los
+dos en R4). La estimación sobre el código original sumaba 12.
 
 **R1: Transferencias por llave.** Se creó la regla `ComisionLlave`, que devuelve comisión 0, y se
 registró el tipo `LLAVE` en el mapa de `Main`. En el código original habría que haber editado el
@@ -284,3 +289,10 @@ dos clases, y el método `transferir` no se tocó. Después se creó `SistemaAnt
 `RegistroMultiple`, que reparte el registro a los dos. Las cinco pruebas del bloque 3 siguieron
 pasando sin modificarlas. Al ejecutar el programa aparecen la línea `[AUDITORIA]` y la línea
 `[ANTIFRAUDE]`, y la prueba nueva comprueba que una transferencia rechazada no genera ninguna.
+
+**R5: Migración a PostgreSQL.** Se creó `PostgresRepositorio`, que implementa
+`RepositorioTransacciones`, y en `Main` se cambió una línea: `new OracleRepositorio()` pasó a
+`new PostgresRepositorio()`. `OracleRepositorio` sigue en el proyecto sin cambios, por si hay que
+devolverse. `TransaccionService` no se tocó, porque solo conoce la interfaz. Al ejecutar el
+programa las dos primeras líneas ahora dicen `[POSTGRES]` en vez de `[ORACLE]`, y las pruebas
+unitarias no cambiaron.
