@@ -213,3 +213,32 @@ guarda en una lista y un canal falso que anota los mensajes. La transferencia a 
 el saldo de origen en $892.500 (1.000.000 menos 100.000 menos 7.500), se guardó una vez con
 comisión de 7.500 y generó un mensaje. En la consola no apareció ninguna línea `[ORACLE]` ni
 `[SMS]`.
+
+## Bloque 3 — Pruebas unitarias
+
+Las pruebas están en `src/test/java/TransaccionServiceTest.java` y se ejecutan con `mvn test`.
+Son las cinco que pide la guía:
+
+1. Una transferencia al mismo banco no cobra comisión y mueve exactamente el monto.
+2. Una transferencia a otro banco cobra $7.500 y descuenta monto más comisión del origen.
+3. Con saldo insuficiente la transferencia se rechaza y no se guarda ni se notifica.
+4. Una transferencia exitosa se guarda una sola vez y genera una sola notificación.
+5. Un tipo de transferencia desconocido se rechaza y el saldo de origen no cambia.
+
+Usamos dos dobles de prueba escritos a mano, sin framework de mocks: `RepositorioEnMemoria`, que
+implementa `RepositorioTransacciones` y guarda las transacciones en una lista, y `CanalFalso`, que
+implementa `CanalNotificacion` y anota los mensajes en vez de enviarlos.
+
+**¿Cuánto tardan en ejecutarse todas las pruebas?** Las cinco tardan 0,07 segundos según el
+reporte de Maven. Ninguna se conecta a Oracle ni envía un SMS.
+
+**¿Cuántas líneas de `TransaccionService` tuvieron que cambiar para poder probarla?** Para
+escribir las pruebas, ninguna. El cambio que permitió probarla fue el del punto de control D: se
+quitaron las 6 líneas donde el servicio creaba sus dependencias con `new` y se agregaron 13 con
+los atributos y el constructor que las recibe. El método `transferir` no se tocó.
+
+**¿Qué habría pasado si intentáramos estas pruebas en el bloque 1?** No se habrían podido
+escribir cumpliendo la condición. El servicio creaba su propio `OracleRepositorio` y su propio
+`SmsGateway`, así que cada prueba habría escrito en la base de datos de producción y le habría
+enviado un SMS a un cliente, como pasó en el experimento 2. Tampoco se habría podido comprobar
+que una transferencia rechazada no guarda nada, porque no había forma de mirar qué se guardó.
