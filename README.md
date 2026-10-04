@@ -192,3 +192,24 @@ El generador no necesita conocer los demás métodos porque lo único que hace e
 No le importa si el producto permite retirar, depositar o pagar cuotas, así que no depende de
 ellos. Por eso ya no hay métodos vacíos: `TarjetaCredito` perdió su `depositar` y `CreditoVivienda`
 perdió su `depositar` y su `retirar`, que antes existían solo porque la interfaz los exigía.
+
+### Punto de control D
+
+`TransaccionService` ya no crea nada con `new`. Todas sus piezas le llegan por el constructor.
+Para los dos sistemas externos creamos una interfaz por cada uno: `RepositorioTransacciones`, que
+implementa `OracleRepositorio`, y `CanalNotificacion`, que implementa `SmsGateway`.
+
+El servicio ya no conoce ninguna clase de infraestructura: no nombra a `OracleRepositorio` ni a
+`SmsGateway`. Sí conoce cinco clases propias del flujo, que recibe ya construidas: `ValidadorMonto`,
+`CalculadoraComision`, `GeneradorComprobante`, `NotificadorTransferencia` y `RegistroAuditoria`.
+A esas no les pusimos interfaz porque hoy solo existe una versión de cada una, y crear una interfaz
+para cada una sería agregar archivos que todavía no aportan nada.
+
+Quien decide si se usa Oracle o si se notifica por SMS es `Main.java`. Es el único archivo que
+nombra esas dos clases, así que cambiar de base de datos o de canal es cambiar una línea ahí.
+
+Volvimos al experimento 2 y ahora sí es posible. Armamos el servicio con un repositorio falso que
+guarda en una lista y un canal falso que anota los mensajes. La transferencia a otro banco dejó
+el saldo de origen en $892.500 (1.000.000 menos 100.000 menos 7.500), se guardó una vez con
+comisión de 7.500 y generó un mensaje. En la consola no apareció ninguna línea `[ORACLE]` ni
+`[SMS]`.

@@ -1,13 +1,20 @@
 public class TransaccionService {
-    private final ValidadorMonto validador = new ValidadorMonto();
+    private final ValidadorMonto validador;
     private final CalculadoraComision calculadora;
-    private final OracleRepositorio repositorio = new OracleRepositorio();
-    private final GeneradorComprobante comprobante = new GeneradorComprobante();
-    private final NotificadorTransferencia notificador = new NotificadorTransferencia();
-    private final RegistroAuditoria auditoria = new RegistroAuditoria();
+    private final RepositorioTransacciones repositorio;
+    private final GeneradorComprobante comprobante;
+    private final NotificadorTransferencia notificador;
+    private final RegistroAuditoria auditoria;
 
-    public TransaccionService(CalculadoraComision calculadora) {
+    public TransaccionService(ValidadorMonto validador, CalculadoraComision calculadora,
+                              RepositorioTransacciones repositorio, GeneradorComprobante comprobante,
+                              NotificadorTransferencia notificador, RegistroAuditoria auditoria) {
+        this.validador = validador;
         this.calculadora = calculadora;
+        this.repositorio = repositorio;
+        this.comprobante = comprobante;
+        this.notificador = notificador;
+        this.auditoria = auditoria;
     }
 
     public void transferir(Cuenta origen, Cuenta destino, double monto, String tipo) {

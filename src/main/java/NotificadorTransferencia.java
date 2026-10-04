@@ -1,8 +1,12 @@
 public class NotificadorTransferencia {
-    private final SmsGateway sms = new SmsGateway();
+    private final CanalNotificacion canal;
+
+    public NotificadorTransferencia(CanalNotificacion canal) {
+        this.canal = canal;
+    }
 
     public void notificar(Cuenta origen, Cuenta destino, double monto) {
-        sms.enviar(origen.getTitular(),
+        canal.enviar(origen.getTitular(),
             "Transferiste $" + monto + " a la cuenta " + destino.getNumero());
     }
 }
