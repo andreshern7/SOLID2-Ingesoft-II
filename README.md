@@ -252,6 +252,7 @@ commit `bloque-0-codigo-base`. Las columnas de archivos cuentan solo código (no
 |---|---|---|---|---|
 | R1 | 1 (`TransaccionService`) | 1 (`Main`) | 2 (`ComisionLlave` y su prueba `TransferenciaLlaveTest`) | No |
 | R2 | 4 (`Main`, `Cuenta`, `CobroCuotaManejo`, `TransaccionService`) | 0 | 2 (`CuentaInfantil` y su prueba `CuentaInfantilTest`) | No |
+| R3 | 2 (`TransaccionService`, `SmsGateway`) | 1 (`Main`) | 3 (`PushGateway`, `CanalMultiple` y su prueba `CanalMultipleTest`) | No |
 
 **R1: Transferencias por llave.** Se creó la regla `ComisionLlave`, que devuelve comisión 0, y se
 registró el tipo `LLAVE` en el mapa de `Main`. En el código original habría que haber editado el
@@ -265,3 +266,10 @@ que lo real: en el código original tampoco hacía falta editar esas clases, por
 cualquier `Cuenta`. Queda una limitación: la cuota de manejo se cobra con `retirar`, así que
 cuenta para el tope diario. Si la cuenta ya retiró más de $187.100 ese día, el cobro de la cuota
 se rechazaría.
+
+**R3: Notificaciones push.** Se creó `PushGateway`, otro `CanalNotificacion` como `SmsGateway`, y
+`CanalMultiple`, un canal que reenvía el mensaje a una lista de canales. En `Main` se cambió una
+línea para armar el canal con SMS y push. `NotificadorTransferencia` no se tocó, porque para él
+sigue siendo un solo canal. Al ejecutar el programa, por la transferencia aparecen las líneas
+`[SMS]` y una línea `[PUSH]`. Desde aquí la salida del programa ya no es igual a
+`salida_original.txt`, porque se agregó funcionalidad.

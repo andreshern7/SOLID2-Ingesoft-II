@@ -15,7 +15,7 @@ public class Main {
             "LLAVE", new ComisionLlave()));
 
         RepositorioTransacciones repositorio = new OracleRepositorio();
-        CanalNotificacion canal = new SmsGateway();
+        CanalNotificacion canal = new CanalMultiple(List.of(new SmsGateway(), new PushGateway()));
 
         TransaccionService servicio = new TransaccionService(
             new ValidadorMonto(), calculadora, repositorio, new GeneradorComprobante(),
