@@ -85,3 +85,22 @@ comisión es ejecutar todo el flujo real.
 
 ### 1.4 Diagrama de clases del código original
 
+
+
+## Bloque 2 — Refactorización
+
+### Punto de control S
+
+Se separaron las responsabilidades de `TransaccionService.transferir` en clases propias:
+`ValidadorMonto`, `CalculadoraComision`, `GeneradorComprobante`, `NotificadorTransferencia`
+y `RegistroAuditoria`. La persistencia ya estaba aislada en `OracleRepositorio`.
+
+**¿Qué hace `TransaccionService`, en una frase?** Coordina los pasos de una transferencia.
+Ya no aparece la "y": validar, calcular, guardar, imprimir, notificar y auditar los hace
+cada clase; el servicio solo decide el orden y mueve el dinero entre las cuentas.
+
+**Si el área legal pide cambiar el formato del comprobante, ¿qué archivo se toca?**
+Solo `GeneradorComprobante.java`. El método que mueve el dinero no se abre.
+
+**Nota:** el servicio todavía crea sus dependencias con `new`. Eso se corrige en el
+punto de control D; en este punto solo se separaron responsabilidades.
