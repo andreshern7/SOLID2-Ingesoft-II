@@ -9,4 +9,9 @@ public class NotificadorTransferencia {
         canal.enviar(origen.getTitular(),
             "Transferiste $" + monto + " a la cuenta " + destino.getNumero());
     }
+
+    public void notificar(Cuenta origen, String destino, double monto) {
+        canal.enviar(origen.getTitular(),
+            "Transferiste $" + monto + " a " + destino);
+    }
 }
