@@ -316,7 +316,7 @@ siguieron pasando, para un total de 15. La lista de revisión que les entregamos
 
 ### La revisión que recibimos de la otra pareja
 
-La rama de la revisión que recibimos de la otra pareja está con el nombre de `revision-cruzada`, quedó con el [pull request 1](https://github.com/andreshern7/SOLID2-Ingesoft-II/pull/1) de este repositorio,y la lista se ve en el `REVISION_CRUZADA.md` de la mencionada `revision-cruzada`.
+La rama de la revisión que recibimos de la otra pareja está con el nombre de `revision-cruzada`, quedó con el [pull request 1](https://github.com/andreshern7/SOLID2-Ingesoft-II/pull/1) de este repositorio y la lista se ve en el `REVISION_CRUZADA.md` de la mencionada rama `revision-cruzada`.
 
 ## Bloque 6 — Cierre
 
