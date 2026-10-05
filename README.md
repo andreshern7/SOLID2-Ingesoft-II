@@ -296,3 +296,129 @@ pasando sin modificarlas. Al ejecutar el programa aparecen la línea `[AUDITORIA
 devolverse. `TransaccionService` no se tocó, porque solo conoce la interfaz. Al ejecutar el
 programa las dos primeras líneas ahora dicen `[POSTGRES]` en vez de `[ORACLE]`, y las pruebas
 unitarias no cambiaron.
+
+## Bloque 5 — Revisión cruzada
+
+La rama de la revisión cruzada no se integra a `main`: se deja aparte y se referencia aquí.
+
+### Nuestra revisión del código de la otra pareja
+
+Implementamos R6 (pago de servicios públicos) sobre el repositorio
+[feliariasg/LabSolid](https://github.com/feliariasg/LabSolid), en una rama, con el commit
+`revision-cruzada`. Quedó en el
+[pull request 3](https://github.com/feliariasg/LabSolid/pull/3) de ese repositorio.
+
+Se agregó la comisión fija de $1.500, un servicio de pago de servicios y dos pruebas: una con el
+criterio de aceptación y otra con saldo insuficiente. De las clases que ya existían solo se
+modificó `Main.java`, para registrar la comisión y armar el servicio. Las pruebas que ya tenían
+siguieron pasando, para un total de 15. La lista de revisión que les entregamos está en el archivo
+`REVISION_CRUZADA.md` de esa rama.
+
+### La revisión que recibimos de la otra pareja
+
+Pendiente. A la fecha de este commit la otra pareja todavía no ha entregado su pull request con
+R6 sobre nuestro código ni su lista de revisión. Cuando llegue, la rama quedará en este
+repositorio con el nombre `revision-cruzada` y la lista se copiará en esta sección.
+
+## Bloque 6 — Cierre
+
+### Diagramas de clases, antes y después
+
+**Antes (bloque 1):**
+
+![Diagrama de clases del código original](docs/uml-antes.png)
+
+**Después (código final):**
+
+El diagrama final se partió en dos para que se pueda leer: uno con el flujo de transferencias y
+otro con las cuentas y los productos. Solo `Main` y `Cuenta` aparecen en los dos.
+
+![Diagrama de clases del código final: transferencias](docs/uml-despues-transferencias.png)
+
+![Diagrama de clases del código final: cuentas y productos](docs/uml-despues-cuentas.png)
+
+En el diagrama final ya no hay relaciones en rojo. `CDT` y `Cuenta` heredan de `CuentaBase`, los
+productos de crédito implementan solo las interfaces que les aplican, y `TransaccionService` apunta
+a interfaces (`RepositorioTransacciones`, `RegistroTransaccion`) en vez de a `OracleRepositorio` y
+`SmsGateway`. `Main` es el único que crea los objetos y los conecta.
+
+### Tabla comparativa
+
+| Métrica | Antes | Después |
+|---|---|---|
+| Líneas del método `transferir` | 36 | 12 |
+| Razones distintas por las que `TransaccionService` podría cambiar | 7 | 1: que cambien los pasos de una transferencia o su orden |
+| Clases concretas que `TransaccionService` crea con `new` | 2 | 0 |
+| Métodos vacíos o que lanzan "no aplica" | 4 | 0 |
+| ¿Se puede probar `transferir` sin Oracle ni SMS? | No | Sí (12 pruebas, menos de un segundo) |
+| Número total de archivos | 11 | 41 (33 de código y 8 de pruebas) |
+| Archivos existentes modificados en total en el bloque 4 | 6 modificaciones, sobre 3 archivos distintos | |
+
+### Reflexión
+
+**(a) El código final tiene muchos más archivos que el original. ¿Es eso un problema? ¿En qué
+situación sí lo sería?**
+
+En este caso no. Pasamos de 11 archivos a 33 de código, pero cada uno es corto y hace una sola
+cosa, así que para un cambio casi siempre se sabe cuál abrir. En el bloque 4 eso se notó: cuatro de
+los cinco requerimientos se resolvieron creando clases nuevas y tocando una línea de `Main`.
+
+Sí sería un problema si los archivos se crean sin necesidad. Por ejemplo, si le hubiéramos puesto
+una interfaz a cada clase desde el punto de control D, tendríamos cuatro interfaces más con una
+sola implementación cada una, que solo sirven para dar más vueltas al leer el código. También sería
+un problema en un programa pequeño que no va a cambiar: ahí partirlo en tantas piezas cuesta más de
+lo que ahorra.
+
+**(b) ¿En qué requerimiento del bloque 4 se notó más la diferencia entre el código original y el
+refactorizado? ¿Por qué?**
+
+En R5, la migración a PostgreSQL. En el código original `TransaccionService` creaba su propio
+`OracleRepositorio` con `new`, así que cambiar de base de datos obligaba a abrir la clase que mueve
+el dinero. Nuestra estimación fue de 3 archivos a modificar. En el código refactorizado fue una
+clase nueva (`PostgresRepositorio`) y una línea en `Main`. `TransaccionService` no se tocó y las
+pruebas no cambiaron, porque el servicio solo conoce la interfaz `RepositorioTransacciones`.
+
+R3 (push) fue parecido: se resolvió con dos clases nuevas y una línea en `Main`, cuando en el
+original había que editar el método `transferir`.
+
+**(c) ¿Hubo algún requerimiento que su diseño no aguantó bien? ¿Qué cambiarían?**
+
+Sí, R4 (antifraude). En el punto de control D decidimos no ponerle interfaz a la auditoría porque
+solo existía una versión, y `TransaccionService` recibía directamente un `RegistroAuditoria`.
+Cuando llegó el antifraude tuvimos que crear la interfaz `RegistroTransaccion` y modificar dos
+clases existentes del flujo: `RegistroAuditoria` y `TransaccionService`. Fueron 3 líneas y las
+pruebas siguieron pasando, pero fue el único requerimiento que obligó a tocar el servicio.
+
+No creemos que la decisión del punto D haya sido un error, porque crear la interfaz antes de tener
+la segunda implementación habría sido adivinar. Lo que cambiaríamos es que, al separar
+responsabilidades, todo lo que es "avisarle a otro sistema" (guardar, notificar, auditar) quede
+desde el principio detrás de una interfaz, porque son los puntos donde es más probable que
+aparezca un segundo destino.
+
+**(d) ¿Qué les dijo la otra pareja en la revisión cruzada? ¿Están de acuerdo?**
+
+Pendiente. A la fecha de este commit la otra pareja todavía no ha entregado su pull request ni
+su lista de revisión. Esta respuesta se completa cuando la recibamos.
+
+**(e) Si tuvieran que convencer a su jefe de invertir dos semanas en refactorizar el backend real
+del banco, ¿qué argumento usarían, basándose en los datos de hoy?**
+
+Usaríamos tres datos de este laboratorio.
+
+El primero es el costo de cada cambio. Para los cinco requerimientos del negocio estimamos 12
+archivos por modificar en el código original, y `TransaccionService` aparecía en las cinco
+estimaciones. Con el código refactorizado fueron 6 modificaciones sobre 3 archivos, y la clase que
+mueve el dinero se tocó una sola vez, en 2 líneas. Cada vez que no se toca esa clase es un riesgo
+menos de cobrar mal una transferencia.
+
+El segundo es que ahora se puede probar. Antes era imposible probar una transferencia sin
+escribir en la base de datos de producción y sin enviarle un SMS a un cliente. Ahora hay 12 pruebas
+que corren en menos de un segundo y no tocan Oracle ni el proveedor de mensajería. Los cinco
+requerimientos se entregaron sin romper ninguna.
+
+El tercero es un error que ya no puede llegar a producción. En el experimento 1, un CDT en la
+lista del cobro de cuota tumbaba el proceso a la mitad, y con un millón de cuentas eso significa
+medio millón de cuotas sin cobrar o cobradas dos veces. Hoy ese mismo código no compila.
+
+Dos semanas de refactorización se pagan con los primeros cambios que pida el negocio, porque cada
+uno sale más rápido y con menos riesgo.
