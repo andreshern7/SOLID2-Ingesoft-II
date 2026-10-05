@@ -24,9 +24,30 @@ public class TransaccionService {
         origen.retirar(monto + comision);
         destino.depositar(monto);
 
-        repositorio.guardarTransaccion(origen.getNumero(), destino.getNumero(), monto, comision);
-        comprobante.imprimir(origen.getNumero(), destino.getNumero(), monto, comision);
+        completarTransaccion(tipo, origen, destino.getNumero(), monto, comision);
+    }
+
+    public void pagarServicio(Cuenta origen, String referenciaFactura, double monto) {
+        validador.validar(monto);
+        double comision = calculadora.calcular(monto, "PAGO_SERVICIO");
+
+        origen.retirar(monto + comision);
+
+        completarTransaccion("PAGO_SERVICIO", origen, referenciaFactura, monto, comision);
+    }
+
+    public void pagarServicio(CuentaBase origen, String referenciaFactura, double monto) {
+        if (!(origen instanceof Cuenta)) {
+            throw new IllegalArgumentException("Un CDT no puede pagar servicios");
+        }
+        pagarServicio((Cuenta) origen, referenciaFactura, monto);
+    }
+
+    private void completarTransaccion(String tipo, Cuenta origen, String destino,
+                                      double monto, double comision) {
+        repositorio.guardarTransaccion(origen.getNumero(), destino, monto, comision);
+        comprobante.imprimir(origen.getNumero(), destino, monto, comision);
         notificador.notificar(origen, destino, monto);
-        auditoria.registrar(tipo, origen.getNumero(), destino.getNumero(), monto);
+        auditoria.registrar(tipo, origen.getNumero(), destino, monto);
     }
 }

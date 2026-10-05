@@ -12,7 +12,8 @@ public class Main {
             "MISMO_BANCO", new ComisionMismoBanco(),
             "OTRO_BANCO", new ComisionOtroBanco(),
             "INTERNACIONAL", new ComisionInternacional(),
-            "LLAVE", new ComisionLlave()));
+            "LLAVE", new ComisionLlave(),
+            "PAGO_SERVICIO", new ComisionPagoServicios()));
 
         RepositorioTransacciones repositorio = new PostgresRepositorio();
         CanalNotificacion canal = new CanalMultiple(List.of(new SmsGateway(), new PushGateway()));
@@ -24,6 +25,7 @@ public class Main {
             new ValidadorMonto(), calculadora, repositorio, new GeneradorComprobante(),
             new NotificadorTransferencia(canal), registro);
         servicio.transferir(ana, luis, 150_000, "OTRO_BANCO");
+        servicio.pagarServicio(ana, "AGUA-2026-001", 184_300);
 
         new CobroCuotaManejo().cobrarMensual(List.of(ana, luis));
 
