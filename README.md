@@ -316,7 +316,96 @@ siguieron pasando, para un total de 15. La lista de revisión que les entregamos
 
 ### La revisión que recibimos de la otra pareja
 
-La rama de la revisión que recibimos de la otra pareja está con el nombre de `revision-cruzada`, quedó con el [pull request 1](https://github.com/andreshern7/SOLID2-Ingesoft-II/pull/1) de este repositorio,y la lista se ve en el `REVISION_CRUZADA.md` de la mencionada rama `revision-cruzada`.
+> [!IMPORTANT]
+> El cierre se entregó a tiempo en el primer commit `bloque-6-cierre` (4 de octubre, 23:58). La
+> revisión de la otra pareja llegó el 5 de octubre, y el segundo `bloque-6-cierre` solo agrega
+> al README su lista de revisión y la respuesta (d). No modifica código.
+
+Manuel Federico Castro Suarez y Andrés Felipe Arias González implementaron R6 sobre nuestro
+código. Su trabajo está en la rama
+[`revision-cruzada`](https://github.com/andreshern7/SOLID2-Ingesoft-II/tree/revision-cruzada) de
+este repositorio, que no se integra a `main`, y en el
+[pull request 1](https://github.com/andreshern7/SOLID2-Ingesoft-II/pull/1). La lista de revisión
+original está en el archivo
+[`REVISION_CRUZADA.md`](https://github.com/andreshern7/SOLID2-Ingesoft-II/blob/revision-cruzada/REVISION_CRUZADA.md)
+de esa rama. La copiamos aquí tal como la entregaron.
+
+| Lista de revisión | Sí | No |
+|---|:---:|:---:|
+| Entendimos qué hace cada clase leyendo solo su nombre y sus métodos públicos. | X | |
+| Pudimos reutilizar piezas existentes sin copiar y pegar código. | X | |
+| Implementamos el requerimiento sin modificar la lógica de clases existentes. | | X |
+| No encontramos métodos vacíos ni que lancen “no aplica”. | X | |
+| No encontramos `if`/`switch` por tipo que tuvimos que extender. | X | |
+| Las pruebas existentes siguieron pasando después de nuestro cambio. | | X |
+| No encontramos abstracciones innecesarias (interfaces que no aportan). | X | |
+
+La tercera respuesta es **No** porque fue necesario modificar
+`TransaccionService` para extraer `completarTransaccion` y ampliar
+`NotificadorTransferencia` con el caso en que el destino es una referencia de
+factura. Son cambios acotados y conservan el comportamiento de las
+transferencias, pero sí modifican clases que ya existían.
+
+La sexta respuesta queda en **No** únicamente porque no pudimos ejecutar
+`mvn test` en el entorno de revisión: Maven no estaba instalado. La suite
+incluye pruebas para transferencias, cuentas, canales, repositorio y el nuevo
+flujo de pago, pero no afirmamos que pasaron sin poder ejecutar el comando.
+
+**Lo mejor del diseño:**
+
+> La estructura de `TransaccionService` permitió ubicar rápidamente las piezas
+> que debía reutilizar el pago de servicios:
+>
+> - `ValidadorMonto` conserva las mismas validaciones que usan las
+>   transferencias.
+> - `CalculadoraComision` permite registrar
+>   `ComisionPagoServicios` mediante el mapa de reglas, sin agregar un
+>   `if` o un `switch` por tipo.
+> - `RepositorioTransacciones`, `GeneradorComprobante`,
+>   `NotificadorTransferencia` y `RegistroTransaccion` ya estaban abstraídos
+>   mediante dependencias inyectadas.
+> - El método privado `completarTransaccion` concentra el guardado, el
+>   comprobante, la notificación y la auditoría. Así el nuevo pago reutiliza el
+>   mismo flujo y no duplica la lógica de `transferir`.
+>
+> También fue claro comprobar el criterio de aceptación: un pago de `$184.300`
+> calcula una comisión fija de `$1.500`, descuenta `$185.800` y usa la
+> referencia de factura como destino en el repositorio, comprobante, notificación
+> y auditoría. El registro compuesto existente permite que el pago siga pasando
+> por auditoría y antifraude.
+
+**Lo que nos costó entender o extender:**
+
+> - El nombre `CalculadoraComision.calcular` y el mensaje de error
+>   “Tipo de transferencia desconocido” siguen hablando de transferencias,
+>   aunque la calculadora ahora también maneja pagos de servicios. No afecta el
+>   caso válido, pero puede confundir al diagnosticar un tipo de pago inválido.
+> - La restricción del CDT se resuelve en la sobrecarga
+>   `pagarServicio(CuentaBase, ...)` mediante `instanceof`. Funciona y evita que
+>   el saldo del CDT cambie, pero hace que el servicio conozca la jerarquía
+>   concreta de cuentas. Una abstracción de capacidades, por ejemplo una
+>   operación de retiro disponible solo para cuentas retirables, podría eliminar
+>   esa comprobación explícita.
+> - `NotificadorTransferencia` conserva su nombre aunque ahora también notifica
+>   pagos de servicios. Además, el mensaje reutilizado dice “Transferiste” para
+>   una factura. Sería más expresivo separar la responsabilidad de notificación
+>   o generalizar el nombre y el mensaje para cualquier transacción.
+> - `Main` crea el `PostgresRepositorio`, los canales de notificación y los
+>   registros concretos directamente. Para probar el nuevo servicio tuvimos que
+>   construir manualmente dobles de prueba, aunque el constructor de
+>   `TransaccionService` sí permite inyectarlos.
+>
+> En conjunto, el diseño soportó bien el requerimiento: solo se agregó la regla
+> de comisión, se extendió la notificación y se reutilizó el flujo común. Las
+> observaciones anteriores son oportunidades de mejora para que el siguiente
+> requerimiento no tenga que distinguir entre transferencias y otros tipos de
+> transacción.
+
+**Lo que comprobamos nosotros sobre su rama.** Ellos no pudieron correr `mvn test` porque no
+tenían Maven instalado. Nosotros lo corrimos sobre la rama `revision-cruzada`: pasan las 15
+pruebas, las 12 que ya teníamos sin modificar y las 3 nuevas de `PagoServiciosTest`. Al ejecutar
+el programa, el pago de $184.300 muestra comisión de $1.500, la referencia de la factura como
+destino y las líneas `[AUDITORIA]` y `[ANTIFRAUDE]`.
 
 ## Bloque 6 — Cierre
 
@@ -395,8 +484,44 @@ aparezca un segundo destino.
 
 **(d) ¿Qué les dijo la otra pareja en la revisión cruzada? ¿Están de acuerdo?**
 
-Pendiente. A la fecha de este commit la otra pareja todavía no ha entregado su pull request ni
-su lista de revisión. Esta respuesta se completa cuando la recibamos.
+Marcaron Sí en cinco de las siete afirmaciones. Dijeron que entendieron las clases por su nombre,
+que pudieron reutilizar `ValidadorMonto`, `CalculadoraComision`, `RepositorioTransacciones`,
+`GeneradorComprobante` y `RegistroTransaccion` sin copiar código, y que agregar la comisión del
+pago fue crear una clase y registrarla en el mapa, sin tocar ningún `if` o `switch`.
+
+Marcaron No en dos. La primera: tuvieron que modificar clases existentes, `TransaccionService` y
+`NotificadorTransferencia`. La segunda: no pudieron confirmar que las pruebas pasaran, porque no
+tenían Maven instalado.
+
+Estamos de acuerdo con casi todo.
+
+Sobre `NotificadorTransferencia` tienen razón. Su método pedía una cuenta de destino y armaba el
+mensaje "Transferiste $... a la cuenta ...", así que no servía para una factura. Ellos agregaron
+un segundo método que recibe el destino como texto. Lo correcto habría sido que el notificador
+recibiera desde el principio el texto del destino y no una `Cuenta`, o que el mensaje no hablara
+solo de transferencias. Al revisar su rama notamos además un efecto de ese cambio: ahora las
+transferencias también pasan por el método nuevo, y el SMS dejó de decir "a la cuenta 001-2" para
+decir "a 001-2". Ninguna prueba lo detectó porque nuestras pruebas cuentan los mensajes pero no
+revisan su texto. Es una debilidad de nuestras pruebas, no de su trabajo.
+
+Sobre `TransaccionService` también tienen razón. El servicio solo sabía hacer transferencias entre
+dos cuentas, y para reutilizar los pasos de guardar, imprimir, notificar y auditar tuvieron que
+extraerlos a un método privado. Eso muestra que nuestra separación del punto S dejó esos cuatro
+pasos pegados a `transferir`, cuando podían estar en una pieza aparte que cualquier operación
+pudiera usar.
+
+Sobre el CDT estamos de acuerdo a medias. Ellos lo rechazan con un `instanceof` y proponen una
+abstracción para las cuentas que permiten retirar. Esa abstracción ya existe: es `Cuenta`. Si el
+método de pago recibe solo `Cuenta`, un CDT no compila y no hace falta el `instanceof`. Que no lo
+hayan visto así quiere decir que el nombre `Cuenta` no deja claro que significa "cuenta que
+permite retiros", y eso sí es responsabilidad nuestra.
+
+Sobre las pruebas, el No fue por una limitación de su equipo y no del código. Las corrimos
+nosotros sobre su rama y pasan las 15.
+
+No compartimos del todo la observación sobre `Main`. Que `Main` cree las clases concretas es lo
+que pide el punto de control D, y para probar su servicio usaron nuestros dobles de prueba, que es
+el uso esperado.
 
 **(e) Si tuvieran que convencer a su jefe de invertir dos semanas en refactorizar el backend real
 del banco, ¿qué argumento usarían, basándose en los datos de hoy?**
